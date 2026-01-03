@@ -14,7 +14,6 @@ import {
   Typography,
 } from '@mui/material'
 import Grid from '@mui/material/Grid'
-import { useTheme } from '@mui/material/styles'
 import {
   CartesianGrid,
   Line,
@@ -29,7 +28,6 @@ import ChartCard from '../components/ChartCard.jsx'
 import { getForecasting } from '../api/dashboardApi.js'
 
 export default function Forecasting() {
-  const theme = useTheme()
   const [horizonDays, setHorizonDays] = useState(30)
   const [startDate, setStartDate] = useState('')
   const [loading, setLoading] = useState(true)
@@ -144,13 +142,7 @@ export default function Forecasting() {
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="price"
-                    stroke={theme.palette.primary.main}
-                    strokeWidth={3}
-                    dot={false}
-                  />
+                  <Line type="monotone" dataKey="price" strokeWidth={3} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </Box>
@@ -166,13 +158,7 @@ export default function Forecasting() {
                   <XAxis dataKey="date" />
                   <YAxis />
                   <Tooltip />
-                  <Line
-                    type="monotone"
-                    dataKey="demand"
-                    stroke={theme.palette.secondary.main}
-                    strokeWidth={3}
-                    dot={false}
-                  />
+                  <Line type="monotone" dataKey="demand" strokeWidth={3} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
             </Box>
