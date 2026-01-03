@@ -29,7 +29,13 @@ export async function getOptimization() {
   return safeGet('/optimization', optimizationMock)
 }
 
-export async function getForecasting({ horizonDays, startDate }) {
+export async function getForecasting({
+  horizonDays,
+  startDate,
+  nitrogenN,
+  phosphorusP,
+  potassiumK,
+}) {
   if (FORCE_MOCK_FORECASTING) {
     await delay(150)
     return buildForecastingMock({
@@ -37,6 +43,9 @@ export async function getForecasting({ horizonDays, startDate }) {
       variety: 'BG-352',
       horizonDays,
       startDate: startDate || null,
+      nitrogenN: nitrogenN ?? null,
+      phosphorusP: phosphorusP ?? null,
+      potassiumK: potassiumK ?? null,
     })
   }
 
@@ -44,6 +53,9 @@ export async function getForecasting({ horizonDays, startDate }) {
     const res = await client.post('/forecasting', {
       horizonDays,
       startDate: startDate || null,
+      nitrogenN: nitrogenN ?? null,
+      phosphorusP: phosphorusP ?? null,
+      potassiumK: potassiumK ?? null,
     })
     return res.data
   } catch {
@@ -53,6 +65,9 @@ export async function getForecasting({ horizonDays, startDate }) {
       variety: 'BG-352',
       horizonDays,
       startDate: startDate || null,
+      nitrogenN: nitrogenN ?? null,
+      phosphorusP: phosphorusP ?? null,
+      potassiumK: potassiumK ?? null,
     })
   }
 }
