@@ -105,7 +105,6 @@ export default function Forecasting() {
   }
 
   const sentiment = useMemo(() => data?.sentiment ?? null, [data])
-  const recommendation = data?.recommendation
   const runSummary = useMemo(() => {
     const firstDate = data?.priceForecast?.[0]?.date
     const days = data?.priceForecast?.length
@@ -114,6 +113,63 @@ export default function Forecasting() {
       ? ` | NPK: N=${data.filters.nitrogenN ?? '--'} P=${data.filters.phosphorusP ?? '--'} K=${data.filters.potassiumK ?? '--'}`
       : ''
     return `Last run: ${days} day(s) starting ${firstDate}${npk}`
+  }, [data])
+
+  const predictionsRows = useMemo(() => {
+    const priceRows = data?.priceForecast ?? []
+    const demandRows = data?.demandForecast ?? []
+    const n = Math.min(priceRows.length, demandRows.length)
+    if (!n) return []
+
+    const rows = []
+    for (let i = 0; i < n; i += 1) {
+      const date = priceRows[i]?.date ?? demandRows[i]?.date ?? `D${i + 1}`
+      const price = Number(priceRows[i]?.price)
+      const demand = Number(demandRows[i]?.demand)
+      rows.push({
+        id: `${date}-${i}`,
+        date,
+        price: Number.isFinite(price) ? price : null,
+        demand: Number.isFinite(demand) ? demand : null,
+      })
+    }
+    return rows
+  }, [data])
+
+  const sellingAdvice = useMemo(() => {
+    const avg = (arr) => {
+      if (!arr?.length) return null
+      const sum = arr.reduce((a, b) => a + b, 0)
+      return sum / arr.length
+    }
+
+    const priceArr = (data?.priceForecast ?? []).map((r) => Number(r.price)).filter(Number.isFinite)
+    const demandArr = (data?.demandForecast ?? []).map((r) => Number(r.demand)).filter(Number.isFinite)
+
+    const priceFirst = priceArr[0]
+    const priceLast = priceArr[priceArr.length - 1]
+    const priceAvg = avg(priceArr)
+
+    const demandFirst = demandArr[0]
+    const demandLast = demandArr[demandArr.length - 1]
+    const demandAvg = avg(demandArr)
+
+    if (
+      !Number.isFinite(priceFirst) ||
+      !Number.isFinite(priceLast) ||
+      !Number.isFinite(priceAvg) ||
+      !Number.isFinite(demandFirst) ||
+      !Number.isFinite(demandLast)
+    ) {
+      return '—'
+    }
+
+    // Single final recommendation:
+    // - Prefer "Sell now" only when price outlook is favorable AND demand is not trending down.
+    const priceFavorable = priceLast >= priceFirst && priceLast >= priceAvg
+    const demandNotDown = demandLast >= demandFirst
+
+    return priceFavorable && demandNotDown ? 'Sell now' : 'Delay selling'
   }, [data])
 
   return (
@@ -144,8 +200,10 @@ export default function Forecasting() {
             <TextField
               fullWidth
               label="Today's date"
+              type="date"
               value={todayISO}
-              inputProps={{ readOnly: true }}
+              disabled
+              InputLabelProps={{ shrink: true }}
               helperText="Sensor readings are shown for the current day."
             />
           </Grid>
@@ -252,7 +310,7 @@ export default function Forecasting() {
                   <YAxis />
                   <Tooltip />
                   <Line
-                    type="monotone"
+                    type="linear"
                     dataKey="price"
                     stroke={theme.palette.primary.main}
                     strokeWidth={3}
@@ -274,7 +332,7 @@ export default function Forecasting() {
                   <YAxis />
                   <Tooltip />
                   <Line
-                    type="monotone"
+                    type="linear"
                     dataKey="demand"
                     stroke={theme.palette.secondary.main}
                     strokeWidth={3}
@@ -285,6 +343,87 @@ export default function Forecasting() {
             </Box>
           </ChartCard>
         </Grid>
+
+        {predictionsRows.length ? (
+          <Grid size={12}>
+            <Paper variant="outlined" sx={{ p: 2 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap', mb: 1 }}>
+                <Box>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                    Predictions
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Daily price and demand values
+                  </Typography>
+                </Box>
+                <Typography variant="caption" color="text.secondary" sx={{ alignSelf: 'center' }}>
+                  {predictionsRows.length} day(s)
+                </Typography>
+              </Box>
+
+              <Box sx={{ maxHeight: 340, overflow: 'auto', pr: 0.5 }}>
+                {predictionsRows.map((row) => (
+                  <Paper
+                    key={row.id}
+                    variant="outlined"
+                    sx={{
+                      p: 1.5,
+                      mb: 1,
+                      borderRadius: 2,
+                    }}
+                  >
+                    <Grid container spacing={1.5} alignItems="center">
+                      <Grid size={{ xs: 12, md: 4 }}>
+                        <Typography variant="overline" color="text.secondary">
+                          Date
+                        </Typography>
+                        <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+                          {row.date}
+                        </Typography>
+                      </Grid>
+
+                      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        <Typography variant="overline" color="text.secondary">
+                          Price (LKR / kg)
+                        </Typography>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontWeight: 900, color: theme.palette.primary.main }}
+                        >
+                          {row.price == null ? '--' : row.price.toFixed(2)}
+                        </Typography>
+                      </Grid>
+
+                      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                        <Typography variant="overline" color="text.secondary">
+                          Demand (tons)
+                        </Typography>
+                        <Typography
+                          variant="h6"
+                          sx={{ fontWeight: 900, color: theme.palette.secondary.main }}
+                        >
+                          {row.demand == null ? '--' : row.demand.toFixed(2)}
+                        </Typography>
+                      </Grid>
+                    </Grid>
+                  </Paper>
+                ))}
+              </Box>
+            </Paper>
+          </Grid>
+        ) : null}
+
+        <Grid size={12}>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1 }}>
+              Selling Suggestion
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Recommendation: {sellingAdvice}
+            </Typography>
+          </Paper>
+        </Grid>
+
 
         <Grid size={12}>
           <Card sx={{ width: '100%' }}>
@@ -315,15 +454,6 @@ export default function Forecasting() {
                     </ListItem>
                   ))}
                 </List>
-              </Box>
-
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="overline" color="text.secondary">
-                  Farmer Recommendation
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {recommendation ?? '—'}
-                </Typography>
               </Box>
 
               <Box sx={{ mt: 2 }}>
