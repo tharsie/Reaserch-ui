@@ -1,0 +1,19 @@
+fastapi>=0.110
+uvicorn[standard]>=0.27
+
+# ML/runtime deps for GRU (.h5) + RandomForest (.joblib)
+numpy>=1.23,<2.0
+pandas>=2.0
+scikit-learn==1.2.1
+joblib>=1.3
+
+# scikit-learn wheels depend on SciPy; pin to a known-good compatible range.
+scipy>=1.10,<1.12
+
+# IMPORTANT:
+# Your saved GRU .h5 model uses legacy Keras config (e.g. GRU `time_major`).
+# TensorFlow 2.16+ bundles Keras 3, which breaks loading those models.
+# Pin to TF 2.15.x (Keras 2.x) for compatibility.
+tensorflow==2.15.1
+# If you prefer Intel builds on Windows, you can swap the line above for:
+# tensorflow-intel==2.15.1
