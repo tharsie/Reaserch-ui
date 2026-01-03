@@ -6,6 +6,8 @@ import { alertsMock } from '../data/alerts.js'
 import { reportsMock } from '../data/reports.js'
 import { settingsMock } from '../data/settings.js'
 
+const FORCE_MOCK_FORECASTING = true
+
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function safeGet(path, fallback) {
@@ -28,11 +30,31 @@ export async function getOptimization() {
 }
 
 export async function getForecasting({ horizonDays, startDate }) {
-  const res = await client.post('/forecasting', {
-    horizonDays,
-    startDate: startDate || null,
-  })
-  return res.data
+  if (FORCE_MOCK_FORECASTING) {
+    await delay(150)
+    return buildForecastingMock({
+      region: 'Central',
+      variety: 'BG-352',
+      horizonDays,
+      startDate: startDate || null,
+    })
+  }
+
+  try {
+    const res = await client.post('/forecasting', {
+      horizonDays,
+      startDate: startDate || null,
+    })
+    return res.data
+  } catch {
+    await delay(250)
+    return buildForecastingMock({
+      region: 'Central',
+      variety: 'BG-352',
+      horizonDays,
+      startDate: startDate || null,
+    })
+  }
 }
 
 export async function getAlerts() {
