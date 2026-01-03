@@ -14,7 +14,7 @@ export const navItems = [
   },
   {
     key: 'optimization',
-    label: 'Farming Optimization',
+    label: 'Fertilizer Recommendations',
     to: '/farming-optimization',
     icon: AgricultureOutlinedIcon,
   },
