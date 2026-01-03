@@ -26,7 +26,7 @@ export const navItems = [
   },
   {
     key: 'alerts',
-    label: 'Alerts',
+    label: 'Cost Estimation',
     to: '/alerts',
     icon: WarningAmberOutlinedIcon,
   },
