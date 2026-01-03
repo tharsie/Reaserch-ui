@@ -20,4 +20,9 @@ class ForecastRequest(BaseModel):
         description="Optional. If omitted, API uses tomorrow.",
     )
 
+    # Optional NPK sensor readings (UI may send these).
+    nitrogenN: Optional[float] = Field(default=None, description="N (sensor reading)")
+    phosphorusP: Optional[float] = Field(default=None, description="P (sensor reading)")
+    potassiumK: Optional[float] = Field(default=None, description="K (sensor reading)")
+
 

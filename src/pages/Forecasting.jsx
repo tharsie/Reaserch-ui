@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert,
   Box,
@@ -28,25 +28,72 @@ import PageHeader from '../components/PageHeader.jsx'
 import ChartCard from '../components/ChartCard.jsx'
 import { getForecasting } from '../api/dashboardApi.js'
 
+const MOCK_SENSOR_READINGS = [
+  { nitrogenN: 42, phosphorusP: 18, potassiumK: 33 },
+  { nitrogenN: 55, phosphorusP: 24, potassiumK: 40 },
+  { nitrogenN: 38, phosphorusP: 14, potassiumK: 28 },
+  { nitrogenN: 61, phosphorusP: 29, potassiumK: 46 },
+]
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
 export default function Forecasting() {
   const theme = useTheme()
   const [horizonDays, setHorizonDays] = useState(30)
-  const [startDate, setStartDate] = useState('')
-  const [loading, setLoading] = useState(true)
+  const todayISO = useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const [sensorReading, setSensorReading] = useState(null)
+  const [sensorAt, setSensorAt] = useState(null)
+  const [sensorStatus, setSensorStatus] = useState('idle')
+  const [sensorConnected, setSensorConnected] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
+
+  const sensorIndexRef = useRef(0)
+
+  useEffect(() => {
+    if (!sensorConnected) return undefined
+
+    setSensorStatus('connected')
+    const id = setInterval(() => {
+      const idx = sensorIndexRef.current % MOCK_SENSOR_READINGS.length
+      sensorIndexRef.current = idx + 1
+      const reading = MOCK_SENSOR_READINGS[idx]
+      setSensorReading(reading)
+      setSensorAt(new Date())
+    }, 1000)
+
+    return () => clearInterval(id)
+  }, [sensorConnected])
+
+  async function readNpkFromSensor() {
+    setSensorStatus('reading')
+    await delay(350)
+    const idx = sensorIndexRef.current % MOCK_SENSOR_READINGS.length
+    sensorIndexRef.current = idx + 1
+    const reading = MOCK_SENSOR_READINGS[idx]
+    setSensorReading(reading)
+    setSensorAt(new Date())
+    setSensorStatus('ok')
+    return reading
+  }
 
   async function runForecast() {
     setLoading(true)
     setError(null)
     try {
+      const reading = sensorReading ?? (await readNpkFromSensor())
       const res = await getForecasting({
         horizonDays,
-        startDate: startDate ? startDate : null,
+        startDate: todayISO,
+        nitrogenN: reading.nitrogenN,
+        phosphorusP: reading.phosphorusP,
+        potassiumK: reading.potassiumK,
       })
       setData(res)
     } catch (e) {
       setData(null)
+      setSensorStatus('error')
       const msg =
         e?.response?.data?.detail ||
         e?.message ||
@@ -57,19 +104,16 @@ export default function Forecasting() {
     }
   }
 
-  // Run once on first render with defaults. User-triggered afterwards.
-  useEffect(() => {
-    runForecast()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   const sentiment = useMemo(() => data?.sentiment ?? null, [data])
   const recommendation = data?.recommendation
   const runSummary = useMemo(() => {
     const firstDate = data?.priceForecast?.[0]?.date
     const days = data?.priceForecast?.length
     if (!firstDate || !days) return null
-    return `Last run: ${days} day(s) starting ${firstDate}`
+    const npk = data?.filters
+      ? ` | NPK: N=${data.filters.nitrogenN ?? '--'} P=${data.filters.phosphorusP ?? '--'} K=${data.filters.potassiumK ?? '--'}`
+      : ''
+    return `Last run: ${days} day(s) starting ${firstDate}${npk}`
   }, [data])
 
   return (
@@ -99,31 +143,94 @@ export default function Forecasting() {
           <Grid size={{ xs: 12, md: 4 }}>
             <TextField
               fullWidth
-              label="Start date (optional)"
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              helperText="Controls the chart date labels. If empty, API uses tomorrow."
+              label="Today's date"
+              value={todayISO}
+              inputProps={{ readOnly: true }}
+              helperText="Sensor readings are shown for the current day."
             />
           </Grid>
 
-          <Grid size={{ xs: 12, md: 8 }}>
-            <Button
-              variant="contained"
-              onClick={runForecast}
-              disabled={loading}
-              sx={{ height: 56 }}
-            >
-              Run forecast
-            </Button>
+          <Grid size={{ xs: 12, md: 12 }}>
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setSensorConnected(true)
+                  setSensorStatus('connecting')
+                }}
+                disabled={sensorConnected || loading}
+              >
+                Connect sensor
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => {
+                  setSensorConnected(false)
+                  setSensorStatus('disconnected')
+                }}
+                disabled={!sensorConnected || loading}
+              >
+                Disconnect sensor
+              </Button>
+              <Button
+                variant="contained"
+                onClick={runForecast}
+                disabled={loading}
+                sx={{ height: 56 }}
+              >
+                Run forecast
+              </Button>
+            </Box>
           </Grid>
         </Grid>
+
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+          Sensor status: {sensorStatus}
+          {sensorAt ? ` • Last reading: ${sensorAt.toLocaleString()}` : ''}
+        </Typography>
         {runSummary ? (
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
             {runSummary}
           </Typography>
         ) : null}
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Typography variant="subtitle1" sx={{ fontWeight: 800, mb: 1 }}>
+          NPK (from sensor)
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <Paper variant="outlined" sx={{ p: 1.5 }}>
+              <Typography variant="overline" color="text.secondary">
+                Nitrogen (N)
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: 900 }}>
+                {sensorReading?.nitrogenN ?? '--'}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <Paper variant="outlined" sx={{ p: 1.5 }}>
+              <Typography variant="overline" color="text.secondary">
+                Phosphorus (P)
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: 900 }}>
+                {sensorReading?.phosphorusP ?? '--'}
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4 }}>
+            <Paper variant="outlined" sx={{ p: 1.5 }}>
+              <Typography variant="overline" color="text.secondary">
+                Potassium (K)
+              </Typography>
+              <Typography variant="h5" sx={{ fontWeight: 900 }}>
+                {sensorReading?.potassiumK ?? '--'}
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
       </Paper>
 
       {loading ? <LinearProgress sx={{ mb: 2 }} /> : null}

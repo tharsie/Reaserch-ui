@@ -53,12 +53,31 @@ function buildSeries({
   return points
 }
 
-export function buildForecastingMock({ region, variety, horizonDays, startDate }) {
+export function buildForecastingMock({
+  region,
+  variety,
+  horizonDays,
+  startDate,
+  nitrogenN,
+  phosphorusP,
+  potassiumK,
+}) {
   const regionFactor = regions.indexOf(region) >= 0 ? regions.indexOf(region) : 1
   const varietyFactor = varieties.indexOf(variety) >= 0 ? varieties.indexOf(variety) : 1
 
-  const priceBase = 88 + regionFactor * 2 + varietyFactor * 1.5
-  const demandBase = 62 + regionFactor * 1.2 + varietyFactor * 1.0
+  const n = Number.isFinite(Number(nitrogenN)) ? Number(nitrogenN) : null
+  const p = Number.isFinite(Number(phosphorusP)) ? Number(phosphorusP) : null
+  const k = Number.isFinite(Number(potassiumK)) ? Number(potassiumK) : null
+
+  // Simple mock influence from soil nutrients (UI-only):
+  // Higher nutrients -> slightly higher demand index and slightly lower price index.
+  const nutrientMean = [n, p, k].filter((v) => typeof v === 'number').reduce((a, b) => a + b, 0)
+  const nutrientCount = [n, p, k].filter((v) => typeof v === 'number').length
+  const nutrientIndex = nutrientCount ? nutrientMean / nutrientCount : 0
+  const nutrientDelta = Math.max(-0.35, Math.min(0.35, (nutrientIndex - 40) / 120))
+
+  const priceBase = 88 + regionFactor * 2 + varietyFactor * 1.5 - nutrientDelta * 8
+  const demandBase = 62 + regionFactor * 1.2 + varietyFactor * 1.0 + nutrientDelta * 10
 
   const priceForecast = buildSeries({
     horizonDays,
@@ -90,13 +109,23 @@ export function buildForecastingMock({ region, variety, horizonDays, startDate }
     Math.min(95, Math.round(62 + regionFactor * 3 - varietyFactor * 2)),
   )
 
+  const drivers = ['Policy', 'Weather', 'Supply chain']
+  if (nutrientCount) drivers.unshift('Soil nutrients (NPK)')
+
   return {
-    filters: { region, variety, horizonDays },
+    filters: {
+      region,
+      variety,
+      horizonDays,
+      nitrogenN: n,
+      phosphorusP: p,
+      potassiumK: k,
+    },
     priceForecast,
     demandForecast,
     sentiment: {
       score: sentimentScore,
-      drivers: ['Policy', 'Weather', 'Supply chain'],
+      drivers,
       notes: [
         { id: 's1', date: '2026-01-02', text: 'Policy chatter improved market outlook.' },
         { id: 's2', date: '2026-01-01', text: 'Weather uncertainty adds mild downside risk.' },
