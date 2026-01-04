@@ -37,19 +37,17 @@ const MOCK_SENSOR_READINGS = [
 ]
 
 const REGIONS = [
-  'North',
-  'North East',
-  'East',
+  'Central',
   'West',
+  'North',
   'South',
+  'East',
 ]
-
-const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export default function Forecasting() {
   const theme = useTheme()
   const [horizonDays, setHorizonDays] = useState(30)
-  const [region, setRegion] = useState('North')
+  const [region, setRegion] = useState('Central')
   const todayISO = useMemo(() => new Date().toISOString().slice(0, 10), [])
   const [sensorReading, setSensorReading] = useState(null)
   const [sensorAt, setSensorAt] = useState(null)
@@ -226,7 +224,7 @@ export default function Forecasting() {
               label="Region"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
-              helperText="Select a region (e.g., North, North East)"
+              helperText="Select a region (Central, West, North, South, East)"
             >
               {REGIONS.map((r) => (
                 <MenuItem key={r} value={r}>

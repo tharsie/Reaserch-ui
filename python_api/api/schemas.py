@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class HealthResponse(BaseModel):
@@ -11,9 +11,18 @@ class HealthResponse(BaseModel):
 
 
 class ForecastRequest(BaseModel):
+    model_config = ConfigDict(
+        json_schema_extra={
+            # Swagger UI typically prefers `example` for the "Example Value" block.
+            # Keep it minimal as requested.
+            "example": {"region": "North", "horizonDays": 7},
+            "examples": [
+                {"region": "North", "horizonDays": 7}
+            ]
+        }
+    )
     # Keep aligned with the React UI.
     region: str = Field(default="North")
-    variety: str = Field(default="BG-352")
     horizonDays: int = Field(default=30, ge=1, le=365)
     startDate: Optional[date] = Field(
         default=None,
