@@ -2,6 +2,12 @@ import pandas as pd
 from app.model_loader import clf, reg, scaler, encoders, feature_names, df_master
 
 def predict_top3(sensor_data, growth_stage, purpose):
+    if clf is None or reg is None or scaler is None or encoders is None or feature_names is None or df_master is None:
+        raise RuntimeError(
+            "Fertilizer/yield artifacts are not available. "
+            "Ensure models exist under python_api/models/fertilizer_models and python_api/models/yield_models."
+        )
+
     base = {
         "Soil_Temperature (°C)": sensor_data["soil_temp"],
         "Soil_Moisture (%)": sensor_data["soil_moisture"],
