@@ -4,6 +4,7 @@ import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined'
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
+import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
 
 export const navItems = [
   {
@@ -14,7 +15,7 @@ export const navItems = [
   },
   {
     key: 'optimization',
-    label: 'Fertilizer Recommendations',
+    label: 'Farming Optimization',
     to: '/farming-optimization',
     icon: AgricultureOutlinedIcon,
   },
@@ -23,6 +24,12 @@ export const navItems = [
     label: 'Forecasting',
     to: '/forecasting',
     icon: TimelineOutlinedIcon,
+  },
+  {
+    key: 'fertilizer-recommendation',
+    label: 'Fertilizer Recommendation',
+    to: '/fertilizer-recommendation',
+    icon: ScienceOutlinedIcon,
   },
   {
     key: 'alerts',

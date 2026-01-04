@@ -14,7 +14,6 @@ import {
   Typography,
 } from '@mui/material'
 import Grid from '@mui/material/Grid'
-import { useTheme } from '@mui/material/styles'
 import {
   CartesianGrid,
   Line,
@@ -38,7 +37,6 @@ const MOCK_SENSOR_READINGS = [
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export default function Forecasting() {
-  const theme = useTheme()
   const [horizonDays, setHorizonDays] = useState(30)
   const todayISO = useMemo(() => new Date().toISOString().slice(0, 10), [])
   const [sensorReading, setSensorReading] = useState(null)

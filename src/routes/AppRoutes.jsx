@@ -7,6 +7,7 @@ import Alerts from '../pages/Alerts.jsx'
 import Reports from '../pages/Reports.jsx'
 import Settings from '../pages/Settings.jsx'
 import NotFound from '../pages/NotFound.jsx'
+import FertilizerRecommendation from '../pages/fertilizer/FertilizerRecommendation.jsx'
 
 export default function AppRoutes() {
   return (
@@ -16,6 +17,7 @@ export default function AppRoutes() {
         <Route path="/dashboard" element={<DashboardOverview />} />
         <Route path="/farming-optimization" element={<FarmingOptimization />} />
         <Route path="/forecasting" element={<Forecasting />} />
+        <Route path="/fertilizer-recommendation" element={<FertilizerRecommendation />} />
         <Route path="/alerts" element={<Alerts />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<Settings />} />

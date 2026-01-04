@@ -6,8 +6,6 @@ import { alertsMock } from '../data/alerts.js'
 import { reportsMock } from '../data/reports.js'
 import { settingsMock } from '../data/settings.js'
 
-const FORCE_MOCK_FORECASTING = true
-
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function safeGet(path, fallback) {
