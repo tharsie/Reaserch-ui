@@ -5,6 +5,7 @@ import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined'
 import ScienceOutlinedIcon from '@mui/icons-material/ScienceOutlined'
+import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined'
 
 export const navItems = [
   {
@@ -30,6 +31,12 @@ export const navItems = [
     label: 'Fertilizer Recommendation',
     to: '/fertilizer-recommendation',
     icon: ScienceOutlinedIcon,
+  },
+  {
+    key: 'pest-prediction',
+    label: 'Pest Prediction',
+    to: '/pest-prediction',
+    icon: BugReportOutlinedIcon,
   },
   {
     key: 'alerts',

@@ -81,3 +81,33 @@ export async function getReports() {
 export async function getSettings() {
   return safeGet('/settings', settingsMock)
 }
+
+export async function getPestPrediction(stage, light, pressure, humidity, temperature) {
+  await delay(800)
+  // Simple mock logic for demonstration
+  let risk = 0.2
+  // Normalize inputs if they come in as strings or non-numbers
+  const h = Number(humidity) || 0
+  const t = Number(temperature) || 0
+  const l = Number(light) || 0
+
+  if (h > 80) risk += 0.3
+  if (t > 30) risk += 0.2
+  if (l < 200) risk += 0.1
+
+  if (Math.random() > 0.5 || risk > 0.6) {
+    return {
+      predicted_pest: 'Brown Plant Hopper',
+      probability: Math.min(risk, 0.95),
+      recommended_action: 'Apply Imidacloprid 17.8 SL at 1ml/liter of water immediately.',
+      severity: 'High'
+    }
+  } else {
+    return {
+      predicted_pest: 'Rice Blast',
+      probability: 0.45,
+      recommended_action: 'Monitor condition. If lesions appear, apply Tricyclazole 75 WP.',
+      severity: 'Medium'
+    }
+  }
+}
