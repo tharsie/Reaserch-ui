@@ -141,6 +141,37 @@ export default function DashboardOverview() {
               </Button>
             </CardContent>
           </Card>
+          <Card sx={{ mb: 2 }}>
+            <CardContent>
+              <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
+                <Box
+                  sx={{
+                    p: 1.5,
+                    borderRadius: 1.5,
+                    bgcolor: (theme) => alpha(theme.palette.error.main, 0.1),
+                    color: (theme) => theme.palette.error.main,
+                    display: 'flex',
+                  }}
+                >
+                  <BugReportOutlinedIcon />
+                </Box>
+                <Box>
+                  <Typography variant="h6">Price and Demand Forecasting</Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Check for The Future price and Demand
+                  </Typography>
+                </Box>
+              </Stack>
+              <Button
+                variant="outlined"
+                color="error"
+                fullWidth
+                onClick={() => navigate('/pest-prediction')}
+              >
+                Go to Prediction
+              </Button>
+            </CardContent>
+          </Card>
           <ChartCard title="Recent Alerts" subtitle="3–6 latest items with severity">
             <AlertList items={data?.recentAlerts ?? []} title="Alerts" />
           </ChartCard>
