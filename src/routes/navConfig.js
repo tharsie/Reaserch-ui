@@ -1,5 +1,4 @@
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined'
-import AgricultureOutlinedIcon from '@mui/icons-material/AgricultureOutlined'
 import TimelineOutlinedIcon from '@mui/icons-material/TimelineOutlined'
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
@@ -12,12 +11,6 @@ export const navItems = [
     label: 'Dashboard',
     to: '/dashboard',
     icon: DashboardOutlinedIcon,
-  },
-  {
-    key: 'optimization',
-    label: 'Farming Optimization',
-    to: '/farming-optimization',
-    icon: AgricultureOutlinedIcon,
   },
   {
     key: 'forecasting',

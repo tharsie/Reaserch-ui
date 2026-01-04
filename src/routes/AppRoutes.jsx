@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import DashboardLayout from '../layouts/DashboardLayout.jsx'
 import DashboardOverview from '../pages/DashboardOverview.jsx'
-import FarmingOptimization from '../pages/FarmingOptimization.jsx'
 import Forecasting from '../pages/Forecasting.jsx'
 import Alerts from '../pages/Alerts.jsx'
 import Reports from '../pages/Reports.jsx'
@@ -15,7 +14,6 @@ export default function AppRoutes() {
       <Route element={<DashboardLayout />}>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardOverview />} />
-        <Route path="/farming-optimization" element={<FarmingOptimization />} />
         <Route path="/forecasting" element={<Forecasting />} />
         <Route path="/fertilizer-recommendation" element={<FertilizerRecommendation />} />
         <Route path="/alerts" element={<Alerts />} />

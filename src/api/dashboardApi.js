@@ -8,6 +8,8 @@ import { settingsMock } from '../data/settings.js'
 
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
+const FORCE_MOCK_FORECASTING = String(import.meta.env?.VITE_FORCE_MOCK_FORECASTING ?? '').toLowerCase() === 'true'
+
 async function safeGet(path, fallback) {
   try {
     const res = await client.get(path)
@@ -28,6 +30,7 @@ export async function getOptimization() {
 }
 
 export async function getForecasting({
+  region,
   horizonDays,
   startDate,
   nitrogenN,
@@ -37,7 +40,7 @@ export async function getForecasting({
   if (FORCE_MOCK_FORECASTING) {
     await delay(150)
     return buildForecastingMock({
-      region: 'Central',
+      region: region ?? 'Central',
       variety: 'BG-352',
       horizonDays,
       startDate: startDate || null,
@@ -49,6 +52,7 @@ export async function getForecasting({
 
   try {
     const res = await client.post('/forecasting', {
+      region: region ?? 'North',
       horizonDays,
       startDate: startDate || null,
       nitrogenN: nitrogenN ?? null,
@@ -59,7 +63,7 @@ export async function getForecasting({
   } catch {
     await delay(250)
     return buildForecastingMock({
-      region: 'Central',
+      region: region ?? 'Central',
       variety: 'BG-352',
       horizonDays,
       startDate: startDate || null,
