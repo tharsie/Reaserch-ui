@@ -9,11 +9,13 @@ import {
   List,
   ListItem,
   ListItemText,
+  MenuItem,
   Paper,
   TextField,
   Typography,
 } from '@mui/material'
 import Grid from '@mui/material/Grid'
+import { useTheme } from '@mui/material/styles'
 import {
   CartesianGrid,
   Line,
@@ -34,10 +36,20 @@ const MOCK_SENSOR_READINGS = [
   { nitrogenN: 61, phosphorusP: 29, potassiumK: 46 },
 ]
 
+const REGIONS = [
+  'North',
+  'North East',
+  'East',
+  'West',
+  'South',
+]
+
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
 export default function Forecasting() {
+  const theme = useTheme()
   const [horizonDays, setHorizonDays] = useState(30)
+  const [region, setRegion] = useState('North')
   const todayISO = useMemo(() => new Date().toISOString().slice(0, 10), [])
   const [sensorReading, setSensorReading] = useState(null)
   const [sensorAt, setSensorAt] = useState(null)
@@ -82,6 +94,7 @@ export default function Forecasting() {
     try {
       const reading = sensorReading ?? (await readNpkFromSensor())
       const res = await getForecasting({
+        region,
         horizonDays,
         startDate: todayISO,
         nitrogenN: reading.nitrogenN,
@@ -204,6 +217,23 @@ export default function Forecasting() {
               InputLabelProps={{ shrink: true }}
               helperText="Sensor readings are shown for the current day."
             />
+          </Grid>
+
+          <Grid size={{ xs: 12, md: 4 }}>
+            <TextField
+              select
+              fullWidth
+              label="Region"
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              helperText="Select a region (e.g., North, North East)"
+            >
+              {REGIONS.map((r) => (
+                <MenuItem key={r} value={r}>
+                  {r}
+                </MenuItem>
+              ))}
+            </TextField>
           </Grid>
 
           <Grid size={{ xs: 12, md: 12 }}>
