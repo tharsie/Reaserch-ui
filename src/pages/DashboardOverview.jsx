@@ -148,12 +148,12 @@ export default function DashboardOverview() {
                   sx={{
                     p: 1.5,
                     borderRadius: 1.5,
-                    bgcolor: (theme) => alpha(theme.palette.error.main, 0.1),
-                    color: (theme) => theme.palette.error.main,
+                    bgcolor: (theme) => alpha(theme.palette.primary.main, 0.1),
+                    color: (theme) => theme.palette.primary.main,
                     display: 'flex',
                   }}
                 >
-                  <BugReportOutlinedIcon />
+                  <PaidOutlinedIcon />
                 </Box>
                 <Box>
                   <Typography variant="h6">Price and Demand Forecasting</Typography>
@@ -164,11 +164,11 @@ export default function DashboardOverview() {
               </Stack>
               <Button
                 variant="outlined"
-                color="error"
+                color="primary"
                 fullWidth
-                onClick={() => navigate('/pest-prediction')}
+                onClick={() => navigate('/forecasting')}
               >
-                Go to Prediction
+                Go to Forecasting
               </Button>
             </CardContent>
           </Card>

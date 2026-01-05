@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "api": "powershell -ExecutionPolicy Bypass -File python_api\\run_backend.ps1",
+    "dev:all": "powershell -ExecutionPolicy Bypass -Command \"Start-Process powershell -ArgumentList '-NoExit','-ExecutionPolicy','Bypass','-File','python_api\\run_backend.ps1'; npm run dev\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
